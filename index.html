@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#c0302a">
+<title>龍門鬧江湖 Longmen Ruckus</title>
+<meta name="description" content="An original wuxia party board game for four with the Longmen cast: roll, buy Secret Manuals from Mr Bai, and play 15 slapstick minigames. Online with friends or solo vs bots.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="style.css?v=1">
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+</head>
+<body>
+<canvas id="view"></canvas>
+
+<!-- title -->
+<section id="title" class="screen">
+  <div class="logo"><h1 data-t="title">龍門鬧江湖</h1><div class="en">LONGMEN RUCKUS</div><p data-t="sub"></p></div>
+  <div id="cast"></div>
+  <div class="menu panel">
+    <label class="lbl" data-t="yourName"></label>
+    <input id="pname" maxlength="8" autocomplete="off" data-ph="yourName">
+    <button class="btn" id="btn-solo" data-t="solo"></button>
+    <button class="btn yel" id="btn-host" data-t="host"></button>
+    <div class="row"><input id="joincode" maxlength="5" autocomplete="off" data-ph="joinPh"><button class="btn blue small" id="btn-join" data-t="join"></button></div>
+    <div class="row small-row"><button class="btn small ghost" id="btn-howto" data-t="howto"></button><button class="btn small ghost" id="btn-lang" data-t="lang"></button><a class="btn small ghost" href="CREDITS.md" target="_blank" data-t="credits"></a></div>
+  </div>
+  <div class="tools"><button class="btn-music" id="btn-music">♪</button></div>
+</section>
+
+<!-- lobby: character select + room + settings -->
+<section id="lobby" class="screen">
+  <div class="lob-left panel">
+    <h2 data-t="pickChar"></h2>
+    <div id="chars"></div>
+    <div id="char-info"></div>
+    <canvas id="board-prev" width="800" height="500"></canvas>
+  </div>
+  <div class="lob-right panel">
+    <div class="roomline"><span data-t="room"></span> <b id="lobby-code"></b></div>
+    <div id="lobby-share"><button class="btn small blue" id="btn-copy" data-t="copy"></button></div>
+    <div id="lobby-status"></div>
+    <ul id="seats"></ul>
+    <div class="setrow"><span data-t="board"></span><div class="opts" id="set-board"></div></div>
+    <p id="board-blurb"></p>
+    <div class="setrow"><span data-t="turns"></span><div class="opts" id="set-turns"></div></div>
+    <div class="setrow"><span data-t="botLv"></span><div class="opts" id="set-lv"></div></div>
+    <div class="row"><button class="btn small ghost" id="btn-back" data-t="back"></button><button class="btn" id="btn-start" data-t="start"></button><span id="lobby-wait" data-t="waitHost"></span></div>
+  </div>
+</section>
+
+<!-- the game -->
+<section id="game" class="screen">
+  <div id="turninfo"></div>
+  <div class="tools"><button id="btn-map">⌖</button><button class="btn-music" id="btn-music2">♪</button><button id="btn-quit">✕</button></div>
+  <div id="hud"><div id="hud-cards"></div></div>
+  <div id="waiting"></div>
+  <div id="talk"></div>
+  <div id="ask"></div>
+  <div id="banner"></div>
+  <div id="mgintro"></div>
+  <div id="mgend"></div>
+  <div id="award"></div>
+  <div id="final"></div>
+  <div id="pad"><div id="stick"><div id="knob"></div></div><div id="btnA">A</div><div class="padhint">◀ ▶</div></div>
+</section>
+
+<div id="howto"><div class="panel"><h2 data-t="howto"></h2><p id="howto-text"></p></div></div>
+<div id="toasts"></div>
+<script type="module" src="js/main.js?v=1"></script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+{
+ "title": {
+  "zh": "江湖開鑼",
+  "en": "The Gong Opens the Jianghu",
+  "loop": true,
+  "dur": 32.0
+ },
+ "town": {
+  "zh": "客棧大街",
+  "en": "Longmen Inn Street",
+  "loop": true,
+  "dur": 33.103
+ },
+ "mountain": {
+  "zh": "萬妖山上",
+  "en": "Up Myriad Beast Mountain",
+  "loop": true,
+  "dur": 38.4
+ },
+ "river": {
+  "zh": "畫舫遊江",
+  "en": "Painted Boats on the River",
+  "loop": true,
+  "dur": 43.636
+ },
+ "minigame": {
+  "zh": "小試身手",
+  "en": "A Quick Test of Skill",
+  "loop": true,
+  "dur": 27.429
+ },
+ "minigame2": {
+  "zh": "手忙腳亂",
+  "en": "All Thumbs",
+  "loop": true,
+  "dur": 25.946
+ },
+ "results": {
+  "zh": "放榜",
+  "en": "The Scores Go Up",
+  "loop": false,
+  "dur": 6.067
+ },
+ "final": {
+  "zh": "江湖第一",
+  "en": "Champion of the Jianghu",
+  "loop": false,
+  "dur": 22.286
+ }
+}
