@@ -1,13 +1,13 @@
 // 龍門鬧江湖 Longmen Ruckus - menus, lobby, rooms and the glue between the host, the network and the view.
-import { L, LANG, CHARS, CHAR, UI } from './data.js?v=2';
-import { BOARD_IDS, boardName, boardBlurb, buildBoard, paintBoard } from './boards.js?v=2';
-import { SPACES } from './data.js?v=2';
-import { MINIGAMES, MG_IDS } from './minigames.js?v=2';
-import { HostNet, ClientNet, makeCode } from './net.js?v=2';
-import { Host } from './host.js?v=2';
-import { View, PCOL, portraitHTML, spriteHTML } from './view.js?v=2';
-import { Input } from './input.js?v=2';
-import { Sound } from './audio.js?v=2';
+import { L, LANG, CHARS, CHAR, UI } from './data.js?v=3';
+import { BOARD_IDS, boardName, boardBlurb, buildBoard, paintBoard } from './boards.js?v=3';
+import { SPACES } from './data.js?v=3';
+import { MINIGAMES, MG_IDS } from './minigames.js?v=3';
+import { HostNet, ClientNet, makeCode } from './net.js?v=3';
+import { Host } from './host.js?v=3';
+import { View, PCOL, portraitHTML, spriteHTML } from './view.js?v=3';
+import { Input } from './input.js?v=3';
+import { Sound } from './audio.js?v=3';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);

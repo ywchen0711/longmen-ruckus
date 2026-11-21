@@ -1,9 +1,9 @@
 // What every player sees: the board (2D canvas), HUD cards, prompts, minigames and the finale.
 // It only reacts to messages from the host ({t:'state'|'cue'|'ask'|'mg'|'mgs'|'final'}), so all screens stay in step.
-import { L, LANG, CHAR, CHARS, NPC, ITEMS, SPACES, UI, MANUAL_PRICE, pick } from './data.js?v=2';
-import { buildBoard, paintBoard, WORLD } from './boards.js?v=2';
-import { MINIGAMES } from './minigames.js?v=2';
-import { ATLAS } from './atlas.js?v=2';
+import { L, LANG, CHAR, CHARS, NPC, ITEMS, SPACES, UI, MANUAL_PRICE, pick } from './data.js?v=3';
+import { buildBoard, paintBoard, WORLD } from './boards.js?v=3';
+import { MINIGAMES } from './minigames.js?v=3';
+import { ATLAS } from './atlas.js?v=3';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -11,7 +11,7 @@ export const PCOL = ['#e8443a', '#3a7ae8', '#2aa860', '#e8a020'];
 const now = () => performance.now() / 1000;
 const ease = (k) => k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
 
-export const IMG = new Image(); IMG.src = 'assets/chars.png?v=1';
+export const IMG = new Image(); IMG.src = 'assets/chars.png?v=3';
 // a portrait as a CSS-styled div (crisp pixel scaling)
 export function portraitHTML(id, h = 56, cls = '') {
   const k = h / 56, row = ATLAS[id] ?? 0;
