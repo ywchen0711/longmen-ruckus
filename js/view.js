@@ -1,9 +1,9 @@
 // What every player sees: the board (2D canvas), HUD cards, prompts, minigames and the finale.
 // It only reacts to messages from the host ({t:'state'|'cue'|'ask'|'mg'|'mgs'|'final'}), so all screens stay in step.
-import { L, LANG, CHAR, CHARS, NPC, ITEMS, SPACES, UI, MANUAL_PRICE, pick } from './data.js?v=1';
-import { buildBoard, paintBoard, WORLD } from './boards.js?v=1';
-import { MINIGAMES } from './minigames.js?v=1';
-import { ATLAS } from './atlas.js?v=1';
+import { L, LANG, CHAR, CHARS, NPC, ITEMS, SPACES, UI, MANUAL_PRICE, pick } from './data.js?v=2';
+import { buildBoard, paintBoard, WORLD } from './boards.js?v=2';
+import { MINIGAMES } from './minigames.js?v=2';
+import { ATLAS } from './atlas.js?v=2';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -32,15 +32,28 @@ export function makeArt(view) {
       let anim = o.side ? 2 : o.walk ? 1 : 0; let fr = o.frame ?? ((o.walk || o.side) ? Math.floor(now() * 6) % 2 : Math.floor(now() * 2) % 2);
       if (o.side && !o.walk && o.frame == null) fr = 1;
       c.save(); if (o.alpha != null) c.globalAlpha *= o.alpha; if (o.blink && Math.floor(now() * 12) % 2) c.globalAlpha *= 0.35;
-      c.translate(x, y); if (o.rot) { c.translate(0, -12 * s); c.rotate(o.rot); c.translate(0, 12 * s); }
-      if (o.flip) c.scale(-1, 1);
       c.imageSmoothingEnabled = false;
-      c.drawImage(IMG, 52 + fr * 16, row * 76 + anim * 24, 16, 24, -8 * s, -24 * s, 16 * s, 24 * s);
+      const T = c.getTransform();
+      if (!o.rot && !T.b && !T.c) {
+        // whole screen pixels per sprite pixel, feet on a whole screen pixel (no half-pixel smear)
+        const P = Math.max(1, Math.round(T.a * s)), X = Math.round(T.a * x + T.e), Y = Math.round(T.d * y + T.f);
+        c.setTransform(o.flip ? -1 : 1, 0, 0, 1, X, Y);
+        c.drawImage(IMG, 52 + fr * 16, row * 76 + anim * 24, 16, 24, -8 * P, -24 * P, 16 * P, 24 * P);
+      } else {
+        c.translate(x, y); if (o.rot) { c.translate(0, -12 * s); c.rotate(o.rot); c.translate(0, 12 * s); }
+        if (o.flip) c.scale(-1, 1);
+        c.drawImage(IMG, 52 + fr * 16, row * 76 + anim * 24, 16, 24, -8 * s, -24 * s, 16 * s, 24 * s);
+      }
       c.restore();
     },
     spr(c, i, x, y, s, o) { A.sprId(c, A.cid(i), x, y, s, o); },
     npc(c, id, x, y, s, o) { A.sprId(c, id, x, y, s, o); },
-    port(c, i, x, y, h) { const id = A.cid(i); const row = ATLAS[id]; if (row == null || !IMG.complete) return; c.imageSmoothingEnabled = false; c.drawImage(IMG, 0, row * 76, 48, 56, x, y, 48 * h / 56, h); },
+    port(c, i, x, y, h) {
+      const id = A.cid(i); const row = ATLAS[id]; if (row == null || !IMG.complete) return; c.imageSmoothingEnabled = false;
+      const T = c.getTransform();
+      if (!T.b && !T.c) { const P = Math.max(1, Math.round(T.a * h / 56)); c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.drawImage(IMG, 0, row * 76, 48, 56, Math.round(T.a * x + T.e + (T.a * 48 * h / 56 - 48 * P) / 2), Math.round(T.d * y + T.f + T.d * h - 56 * P), 48 * P, 56 * P); c.restore(); }
+      else c.drawImage(IMG, 0, row * 76, 48, 56, x, y, 48 * h / 56, h);
+    },
     txt(c, s, x, y, o = {}) {
       c.save(); c.font = `${o.size || 16}px "Cubic 11", "PingFang TC", "Microsoft JhengHei", sans-serif`; c.textAlign = o.align || 'center'; c.textBaseline = 'middle';
       if (o.bubble) { const w = c.measureText(s).width + 16, h = (o.size || 16) + 12; c.fillStyle = '#fff'; c.strokeStyle = '#3a2a1a'; c.lineWidth = 2; rr(c, x - w / 2, y - h / 2, w, h, 8); c.fill(); c.stroke(); c.beginPath(); c.moveTo(x - 5, y + h / 2 - 1); c.lineTo(x, y + h / 2 + 7); c.lineTo(x + 5, y + h / 2 - 1); c.fill(); }
