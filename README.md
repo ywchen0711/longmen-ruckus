@@ -57,5 +57,9 @@ replaced by a bot mid-game. Solo play needs no network.
   `js/minigames.js` the 15 minigames and their bots · `js/boards.js` boards and backdrops · `js/data.js` heroes, items, text ·
   `js/net.js` PeerJS rooms · `js/input.js` keyboard/gamepad/touch · `js/audio.js` music and sfx.
 - `assets/chars.png` the cast, packed from the Character Gallery by `tools/atlas.py`.
+- `assets/ai/` the AI-painted cast (portraits, and front/side/back figures), brought in from Longmen Tactics by
+  `tools/ai_art.py` (`C:/sdenv/Scripts/python tools/ai_art.py`; re-run it when more paintings arrive). Painted figures
+  are drawn smoothed and animated in code (breathing, a waddle or stride, a squash on action frames, afterimages on the
+  board); anyone not painted keeps the pixel sprite.
 - `tools/score.py` the original score; `tools/render_music.py` renders it with recorded instruments (see CREDITS.md).
 - Test hooks: `?fast=N` speeds the host up, `?auto=1` lets a bot play your seat, `?mg=all` (or `?mg=tiles,buns`) plays only minigames.

@@ -1,9 +1,10 @@
 // What every player sees: the board (2D canvas), HUD cards, prompts, minigames and the finale.
 // It only reacts to messages from the host ({t:'state'|'cue'|'ask'|'mg'|'mgs'|'final'}), so all screens stay in step.
-import { L, LANG, CHAR, CHARS, NPC, ITEMS, SPACES, UI, MANUAL_PRICE, pick } from './data.js?v=3';
-import { buildBoard, paintBoard, WORLD } from './boards.js?v=3';
-import { MINIGAMES } from './minigames.js?v=3';
-import { ATLAS } from './atlas.js?v=3';
+import { L, LANG, CHAR, CHARS, NPC, ITEMS, SPACES, UI, MANUAL_PRICE, pick } from './data.js?v=4';
+import { buildBoard, paintBoard, WORLD } from './boards.js?v=4';
+import { MINIGAMES } from './minigames.js?v=4';
+import { ATLAS } from './atlas.js?v=4';
+import { AI_POR, AI_FIG } from './ai_art.js?v=1';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
@@ -11,15 +12,49 @@ export const PCOL = ['#e8443a', '#3a7ae8', '#2aa860', '#e8a020'];
 const now = () => performance.now() / 1000;
 const ease = (k) => k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
 
-export const IMG = new Image(); IMG.src = 'assets/chars.png?v=3';
-// a portrait as a CSS-styled div (crisp pixel scaling)
+export const IMG = new Image(); IMG.src = 'assets/chars.png?v=4';
+// the AI-painted art (tools/ai_art.py): portraits, and figures as front | side | back stills, 160x200 each; anyone not
+// painted yet keeps the pixel art above
+const FIG = {}, POR = {};
+const aiImg = (dir, id) => { const set = dir === 'fig' ? AI_FIG : AI_POR, m = dir === 'fig' ? FIG : POR; if (!set[id]) return null; if (!m[id]) { m[id] = new Image(); m[id].src = `assets/ai/${dir}/${id}.webp?v=${set[id]}`; } return m[id].complete && m[id].naturalWidth ? m[id] : null; };
+for (const id in AI_FIG) aiImg('fig', id);
+for (const id in AI_POR) aiImg('por', id);
+const FIGW = 0.8, FIGH = 1.05;   // a painted figure's box against the 16x24 pixel sprite it replaces
+// a portrait as a CSS-styled div (crisp pixel scaling; painted portraits are smoothed)
 export function portraitHTML(id, h = 56, cls = '') {
   const k = h / 56, row = ATLAS[id] ?? 0;
+  if (AI_POR[id]) return `<i class="port ai ${cls}" style="width:${48 * k}px;height:${56 * k}px;background-image:url(assets/ai/por/${id}.webp?v=${AI_POR[id]})"></i>`;
   return `<i class="port ${cls}" style="width:${48 * k}px;height:${56 * k}px;background-size:${84 * k}px auto;background-position:0 ${-row * 76 * k}px"></i>`;
 }
 export function spriteHTML(id, h = 48) {
   const k = h / 24, row = ATLAS[id] ?? 0;
+  if (AI_FIG[id]) return `<i class="port ai fig" style="width:${24 * k * FIGW}px;height:${24 * k}px;background-image:url(assets/ai/fig/${id}.webp?v=${AI_FIG[id]})"></i>`;
   return `<i class="port" style="width:${16 * k}px;height:${24 * k}px;background-size:${84 * k}px auto;background-position:${-52 * k}px ${-row * 76 * k}px"></i>`;
+}
+// a painted still made to move: breathing when idle, a waddle or a stride when walking, a squash and spring on the
+// action frame (frame 1: a hit, a bite, a pull), a forward lunge for side views, and afterimages along o.trail
+function drawFig(c, im, id, x, y, s, o) {
+  const t = now(), ph = (id.charCodeAt(0) * 7 + id.length * 13) % 10;
+  const v = o.dir ? (Math.abs(o.dir[0]) > Math.abs(o.dir[1]) * 0.7 ? 1 : o.dir[1] < 0 ? 2 : 0) : o.side ? 1 : 0;
+  const flip = o.dir && v === 1 ? o.dir[0] < 0 : o.flip;
+  const h = 24 * s * FIGH, w = h * FIGW;
+  let sx = 1, sy = 1, lift = 0, tilt = 0, lx = 0;
+  if (o.walk) { const q = t * 9 + ph; lift = Math.abs(Math.sin(q)) * s * 1.4; tilt = v === 1 ? 0.07 + Math.sin(q * 2) * 0.02 : Math.sin(q) * 0.06; sy = 1 + Math.abs(Math.cos(q)) * 0.02; }
+  else { const b = Math.sin(t * 2.4 + ph); sy = 1 + b * 0.018; sx = 1 - b * 0.01; }
+  if (o.frame === 1) { if (v === 1) { lx = 3 * s; tilt = 0.16; sx = 1.04; sy = 0.97; } else { sx = 1.07; sy = 0.93; } }
+  const one = (dx, dy, a) => {
+    c.save(); c.globalAlpha *= a; c.translate(x + dx, y + dy);
+    if (o.rot) { c.translate(0, -12 * s); c.rotate(o.rot); c.translate(0, 12 * s); }
+    if (flip) c.scale(-1, 1);
+    c.translate(lx, -lift); c.rotate(tilt); c.scale(sx, sy);
+    c.drawImage(im, v * im.width / 3, 0, im.width / 3, im.height, -w / 2, -h, w, h);
+    c.restore();
+  };
+  c.save(); c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high';
+  if (o.alpha != null) c.globalAlpha *= o.alpha; if (o.blink && Math.floor(t * 12) % 2) c.globalAlpha *= 0.35;
+  if (o.trail) { const [dx, dy] = o.trail, n = Math.hypot(dx, dy) || 1; for (const j of [2, 1]) one(-dx / n * j * 7 * s, -dy / n * j * 7 * s, 0.32 / j); }
+  one(0, 0, 1);
+  c.restore();
 }
 
 // ------------------------------------------------------------------ drawing helpers shared with the minigames
@@ -28,6 +63,7 @@ export function makeArt(view) {
     L, col: (i) => PCOL[i],
     cid: (i) => typeof i === 'number' ? (view.S ? view.S.players[i].char : 'yirui') : i,
     sprId(c, id, x, y, s, o = {}) {
+      const fig = aiImg('fig', id); if (fig) return drawFig(c, fig, id, x, y, s, o);
       const row = ATLAS[id]; if (row == null || !IMG.complete) return;
       let anim = o.side ? 2 : o.walk ? 1 : 0; let fr = o.frame ?? ((o.walk || o.side) ? Math.floor(now() * 6) % 2 : Math.floor(now() * 2) % 2);
       if (o.side && !o.walk && o.frame == null) fr = 1;
@@ -49,7 +85,9 @@ export function makeArt(view) {
     spr(c, i, x, y, s, o) { A.sprId(c, A.cid(i), x, y, s, o); },
     npc(c, id, x, y, s, o) { A.sprId(c, id, x, y, s, o); },
     port(c, i, x, y, h) {
-      const id = A.cid(i); const row = ATLAS[id]; if (row == null || !IMG.complete) return; c.imageSmoothingEnabled = false;
+      const id = A.cid(i); const por = aiImg('por', id);
+      if (por) { c.save(); c.imageSmoothingEnabled = true; c.imageSmoothingQuality = 'high'; c.drawImage(por, x, y, 48 * h / 56, h); c.restore(); return; }
+      const row = ATLAS[id]; if (row == null || !IMG.complete) return; c.imageSmoothingEnabled = false;
       const T = c.getTransform();
       if (!T.b && !T.c) { const P = Math.max(1, Math.round(T.a * h / 56)); c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.drawImage(IMG, 0, row * 76, 48, 56, Math.round(T.a * x + T.e + (T.a * 48 * h / 56 - 48 * P) / 2), Math.round(T.d * y + T.f + T.d * h - 56 * P), 48 * P, 56 * P); c.restore(); }
       else c.drawImage(IMG, 0, row * 76, 48, 56, x, y, 48 * h / 56, h);
@@ -356,12 +394,12 @@ export class View {
       const [x0, y0, zz, a] = pos[i]; const x = x0 + off[i][0], y = y0 + off[i][1];
       c.fillStyle = 'rgba(0,0,0,0.25)'; c.beginPath(); c.ellipse(x, y + 4, 16, 6, 0, 0, 7); c.fill();
       if (a && a.ride) this.drawRide(c, a.ride, x, y - zz, t);
-      this.A.spr(c, i, x, y + 2 - zz, 2.8, { walk: !!a, rot: a && a.spin ? (t * 12) : 0, alpha: S.players[i].skip ? 0.7 : 1 });
+      this.A.spr(c, i, x, y + 2 - zz, 2.8, { walk: !!a, dir: a ? [a.x1 - a.x0, a.y1 - a.y0] : null, trail: a && zz > 4 ? [a.x1 - a.x0, a.y1 - a.y0] : null, rot: a && a.spin ? (t * 12) : 0, alpha: S.players[i].skip ? 0.7 : 1 });
       if (S.players[i].skip) this.A.txt(c, 'Zz', x + 18, y - 70, { size: 14, color: '#6a6aff' });
-      if (S.cur === i) { const bb = Math.sin(t * 6) * 4; c.fillStyle = PCOL[i]; c.beginPath(); c.moveTo(x - 9, y - 86 + bb); c.lineTo(x + 9, y - 86 + bb); c.lineTo(x, y - 74 + bb); c.fill(); }
-      if (this.stepsLeft[i] > 0) { c.fillStyle = '#fff'; c.beginPath(); c.arc(x, y - 96, 15, 0, 7); c.fill(); c.strokeStyle = PCOL[i]; c.lineWidth = 3; c.stroke(); this.A.txt(c, String(this.stepsLeft[i]), x, y - 95, { size: 18, color: '#222' }); }
+      if (S.cur === i) { const bb = Math.sin(t * 6) * 4; c.fillStyle = PCOL[i]; c.beginPath(); c.moveTo(x - 9, y - 92 + bb); c.lineTo(x + 9, y - 92 + bb); c.lineTo(x, y - 80 + bb); c.fill(); }
+      if (this.stepsLeft[i] > 0) { c.fillStyle = '#fff'; c.beginPath(); c.arc(x, y - 104, 15, 0, 7); c.fill(); c.strokeStyle = PCOL[i]; c.lineWidth = 3; c.stroke(); this.A.txt(c, String(this.stepsLeft[i]), x, y - 103, { size: 18, color: '#222' }); }
     }
-    if (this.bandits) { const k3 = (t - this.bandits.t) * this.sp; if (k3 > 3) this.bandits = null; else { const [x, y] = pos[this.bandits.i]; ['heixiong', 'daoba', 'shouhou'].forEach((id, j) => { const ax = x + [-60, 60, 0][j], ay = y + [10, 10, -40][j]; const e = Math.min(1, k3 * 2); this.A.npc(c, id, x + (ax - x) * e * (k3 > 2.5 ? (3 - k3) * 2 : 1) + (j === 2 ? 0 : 0), ay, 2.8, { walk: true, flip: j === 1 }); }); } }
+    if (this.bandits) { const k3 = (t - this.bandits.t) * this.sp; if (k3 > 3) this.bandits = null; else { const [x, y] = pos[this.bandits.i]; ['heixiong', 'daoba', 'shouhou'].forEach((id, j) => { const ax = x + [-60, 60, 0][j], ay = y + [10, 10, -40][j]; const e = Math.min(1, k3 * 2); const back = k3 > 2.5, mv = e < 1 || back; this.A.npc(c, id, x + (ax - x) * e * (back ? (3 - k3) * 2 : 1), ay, 2.8, { walk: true, flip: j === 1, dir: mv ? [(ax - x) * (back ? -1 : 1), (ay - y) * (back ? -1 : 1)] : null }); }); } }
     // effects
     this.fx = this.fx.filter(f => {
       const age = (t - f.t) * this.sp; const p = f.i != null ? pos[f.i] : null;

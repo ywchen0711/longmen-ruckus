@@ -26,7 +26,7 @@ input { font-family: var(--pix); }
 #title h1 { margin: 0; font-family: var(--pix); font-size: clamp(44px, 9vw, 104px); color: #fff; letter-spacing: 4px; text-shadow: 0 4px 0 var(--red), 0 8px 0 #7a1a12, 0 14px 24px rgba(0, 0, 0, 0.25); transform: rotate(-3deg); }
 #title .en { font-family: var(--pix); font-size: clamp(16px, 2.6vw, 28px); color: #7a1a12; letter-spacing: 8px; margin: 6px 0 0 8px; }
 #title p { margin: 8px 0 0 8px; font-weight: 900; color: #8a4a1a; font-size: clamp(13px, 1.8vw, 18px); }
-#cast { position: absolute; left: calc(4vw + var(--sl)); bottom: calc(6vh + var(--sb)); display: flex; flex-wrap: wrap; gap: 2px; width: min(56vw, 640px); pointer-events: none; }
+#cast { position: absolute; left: calc(4vw + var(--sl)); bottom: calc(6vh + var(--sb)); display: flex; flex-wrap: wrap; gap: 2px; width: min(62vw, 760px); pointer-events: none; }
 #cast span { animation: hopc 0.9s ease-in-out infinite alternate; }
 @keyframes hopc { to { transform: translateY(-10px); } }
 #title .menu { position: absolute; right: calc(4vw + var(--sr)); top: 50%; transform: translateY(-50%); width: min(360px, 92vw); display: flex; flex-direction: column; gap: 10px; }
@@ -191,3 +191,5 @@ body.touchy.inmg #pad { display: block; }
   #turninfo { left: calc(10px + var(--sl)); transform: none; font-size: 14px; }
   #game .tools button { width: 34px; height: 34px; font-size: 15px; }
 }
+.port.ai { background-size: 100% 100%; background-position: 0 0; image-rendering: auto; }
+.port.ai.fig { background-size: 300% 100%; }

@@ -11,6 +11,12 @@ party game.
   Character Gallery (ywchen0711/character-gallery), `nes` style (48x56 portraits, 16x24 sprites), packed by `tools/atlas.py`.
 - **Boards, props and minigame scenes:** drawn in code (`js/boards.js`, `js/minigames.js`, `js/view.js`).
 
+## AI-painted portraits and figures
+The portraits and the painted figures in `assets/ai/` were painted on a local GPU with
+[Animagine XL 4.0](https://huggingface.co/cagliostrolab/animagine-xl-4.0) (CreativeML Open RAIL++-M), from prompts
+written for each character in Longmen Tactics (`C:\LongmenTactics	oolsi_tags.py`), and brought in with
+`tools/ai_art.py`. Characters not painted yet keep their pixel art.
+
 ## Music and sound (original)
 - **Soundtrack:** composed for this game (the score is `tools/score.py`): 江湖開鑼 · The Gong Opens the Jianghu;
   客棧大街 · Longmen Inn Street; 萬妖山上 · Up Myriad Beast Mountain; 畫舫遊江 · Painted Boats on the River;

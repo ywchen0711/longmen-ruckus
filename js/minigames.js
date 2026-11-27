@@ -472,7 +472,7 @@ export const MINIGAMES = {
         if (S.ph === 'shuf' && S.k < S.sw.length) { const f = ((S.t - S.pt) / S.swd) - S.k; const [a, bb] = S.sw[S.k]; const s = S.slot[b]; if (s === a || s === bb) { const to = s === a ? bb : a; const e = clamp(f, 0, 1); x = sx(s) + (sx(to) - sx(s)) * e; y = 240 + Math.sin(e * Math.PI) * (s === a ? -40 : 30); } }
         const real = b === 0; const rev = S.ph === 'rev';
         if (rev && !real) { A.npc(c, 'shouhou', x, y, 3, {}); c.fillStyle = 'rgba(255,255,255,0.5)'; c.beginPath(); c.arc(x, y - 40, 30 * (1 - (S.pt - S.t) / 2), 0, 7); c.fill(); }
-        else A.npc(c, 'baixian', x, y, 3, { frame: (S.t * 4 | 0) % 2 });
+        else A.npc(c, 'baixian', x, y, 3, {});
         if ((S.ph === 'show' || rev) && real) { c.fillStyle = 'rgba(255,230,80,0.35)'; c.beginPath(); c.arc(x, y - 36, 44, 0, 7); c.fill(); A.txt(c, A.L({ zh: '我才是真的！', en: 'I\'m the real one!' }), x, y - 92, { size: 14, color: '#3a2a1a', bubble: true }); }
       }
       for (let i = 0; i < 4; i++) {
@@ -596,7 +596,7 @@ export const MINIGAMES = {
       const off = S.r * 1.2;
       c.strokeStyle = '#c8a060'; c.lineWidth = 6; c.beginPath(); c.moveTo(40 + off, 240); c.lineTo(600 + off, 240); c.stroke();
       c.fillStyle = '#e83a2a'; c.fillRect(316 + off, 232, 8, 18);
-      [0, 1, 2, 3].forEach(i => { const t = S.team[i]; const k = [0, 1, 2, 3].filter(j => S.team[j] === t).indexOf(i); const x = (t ? 400 + k * 70 : 240 - k * 70) + off; const lean = (t ? 1 : -1) * Math.min(0.4, S.pw[i] * 0.06); A.spr(c, i, x, 262, 3, { rot: lean, flip: !t, frame: (S.pw[i] > 0.5 && (S.t * 8 | 0) % 2) ? 1 : 0 }); A.tag(c, i, x, 282); });
+      [0, 1, 2, 3].forEach(i => { const t = S.team[i]; const k = [0, 1, 2, 3].filter(j => S.team[j] === t).indexOf(i); const x = (t ? 400 + k * 70 : 240 - k * 70) + off; const lean = (t ? 1 : -1) * Math.min(0.4, S.pw[i] * 0.06); A.spr(c, i, x + (S.pw[i] > 0.5 ? Math.sin(S.t * 50) * 1.5 : 0), 262, 3, { rot: lean, side: true, flip: !!t }); A.tag(c, i, x, 282); });
       A.txt(c, A.L({ zh: '紅隊', en: 'Red' }), 80, 40, { size: 20, color: '#e84a4a', stroke: '#fff' }); A.txt(c, A.L({ zh: '藍隊', en: 'Blue' }), 560, 40, { size: 20, color: '#3a6ae8', stroke: '#fff' });
       c.fillStyle = 'rgba(0,0,0,0.2)'; c.fillRect(170, 70, 300, 10); c.fillStyle = '#fff'; c.fillRect(318 + S.r, 66, 4, 18);
     },
@@ -647,7 +647,7 @@ export const MINIGAMES = {
       c.strokeStyle = 'rgba(255,255,255,0.18)'; c.lineWidth = 16; c.beginPath(); c.arc(320, 190, 110, S.sa - 0.5 * Math.sign(S.sv), S.sa, S.sv < 0); c.stroke();
       const ex = 320 + Math.cos(S.sa) * 180, ey = 190 + Math.sin(S.sa) * 180;
       c.strokeStyle = '#6a3a1a'; c.lineWidth = 9; c.beginPath(); c.moveTo(320, 190); c.lineTo(ex, ey); c.stroke(); c.strokeStyle = '#b07a3a'; c.lineWidth = 4; c.stroke();
-      A.spr(c, S.solo, 320, 206, 3.4, { rot: Math.sin(S.t * 3) * 0.25, frame: (S.t * 3 | 0) % 2 });
+      A.spr(c, S.solo, 320, 206, 3.4, { rot: Math.sin(S.t * 3) * 0.25 });
       c.fillStyle = '#c8a040'; c.beginPath(); c.arc(342, 176, 8, 0, 7); c.arc(342, 164, 5, 0, 7); c.fill();
       A.txt(c, A.L({ zh: '嗝～', en: 'Hic~' }), 360, 130 + Math.sin(S.t * 2) * 4, { size: 14, color: '#fff' });
       S.p.forEach((p, i) => { if (i === S.solo) return; if (p.out) { A.spr(c, i, p.x, p.y + 12, 2.4, { rot: Math.PI / 2, alpha: 0.6 }); return; } shadow(c, p.x, p.y + 12, 12 - p.z * 0.1); A.spr(c, i, p.x, p.y + 12 - p.z, 2.4, { flip: p.f < 0, blink: p.inv > 0, walk: S.t > 0 }); hearts(c, p.x, p.y - 62 - p.z, p.hp, 2); A.tag(c, i, p.x, p.y + 26); });

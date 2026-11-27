@@ -1,8 +1,8 @@
 // The host runs the whole party: board state, dice, events, items, minigames and payouts.
 // Everyone (the host's own screen included) only sees what it emits: {t:'state'} snapshots and {t:'cue'} animations.
-import { CHAR, ITEMS, ITEM_IDS, MANUAL_PRICE, AWARDS, pick } from './data.js?v=3';
-import { buildBoard, distTo, nextOf } from './boards.js?v=3';
-import { MINIGAMES, MG_IDS } from './minigames.js?v=3';
+import { CHAR, ITEMS, ITEM_IDS, MANUAL_PRICE, AWARDS, pick } from './data.js?v=4';
+import { buildBoard, distTo, nextOf } from './boards.js?v=4';
+import { MINIGAMES, MG_IDS } from './minigames.js?v=4';
 
 const R = Math.random;
 const d6 = () => 1 + Math.floor(R() * 6);
